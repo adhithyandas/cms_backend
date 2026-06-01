@@ -3,7 +3,7 @@ const { uploadToS3 } = require('../../utils/s3Upload');
 
 const addGallery = async (req, res) => {
     try {
-        const { image } = req.files;
+        const image = req.file;
         if (!image) {
             return res.status(400).json({ message: 'Image is required' });
         }
