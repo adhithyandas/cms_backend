@@ -41,7 +41,7 @@ const updateCourse = async (req, res) => {
         }
         const updateData = { title, description, price };
         if (url) updateData.icon = url;
-        
+
         const course = await Course.findByIdAndUpdate(id, updateData, { new: true });
         res.status(200).json(course);
     } catch (error) {
