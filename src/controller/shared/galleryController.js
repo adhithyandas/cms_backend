@@ -7,8 +7,10 @@ const addGallery = async (req, res) => {
         if (!image) {
             return res.status(400).json({ message: 'Image is required' });
         }
+
         const url = await uploadToS3(image, 'gallery');
         const gallery = await Gallery.create({ image: url });
+
         res.status(201).json(gallery);
     } catch (error) {
         console.error('Error adding gallery:', error);
@@ -18,8 +20,14 @@ const addGallery = async (req, res) => {
 
 const getGallery = async (req, res) => {
     try {
-        const gallery = await Gallery.find();
-        res.status(200).json(gallery);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
+
+        const data = await Gallery.find().sort({ _id: -1 }).skip(skip).limit(limit);
+        const total = await Gallery.countDocuments();
+
+        res.status(200).json({ data, total, page, limit });
     } catch (error) {
         console.error('Error fetching gallery:', error);
         res.status(500).json({ message: 'Internal server error' });
@@ -30,6 +38,7 @@ const deleteGallery = async (req, res) => {
     try {
         const { id } = req.params;
         const gallery = await Gallery.findByIdAndDelete(id);
+
         res.status(200).json(gallery);
     } catch (error) {
         console.error('Error deleting gallery:', error);
