@@ -1,16 +1,14 @@
 const Course = require('../../models/courseModel');
-const { uploadToS3 } = require('../../utils/s3Upload');
 
 const addCourse = async (req, res) => {
     try {
         const { title, description, price } = req.body;
-        if (!title || !description || !icon || !price) {
-            return res.status(400).json({ message: 'Title, description, icon and price are required' });
+        
+        if (!title || !description || !price) {
+            return res.status(400).json({ message: 'Title, description and price are required' });
         }
 
-        const icon = req.file;
-        const url = await uploadToS3(icon, 'course');
-        const course = await Course.create({ title, description, icon: url, price });
+        const course = await Course.create({ title, description, price });
 
         res.status(201).json(course);
     } catch (error) {
@@ -43,15 +41,7 @@ const updateCourse = async (req, res) => {
             return res.status(400).json({ message: 'Title, description, and price are required' });
         }
 
-        const icon = req.file;
-
-        let url;
-        if (icon) {
-            url = await uploadToS3(icon, 'course');
-        }
-
         const updateData = { title, description, price };
-        if (url) updateData.icon = url;
 
         const course = await Course.findByIdAndUpdate(id, updateData, { new: true });
 
